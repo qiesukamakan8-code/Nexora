@@ -6,6 +6,13 @@
             exit 1
           fi
           sed -i '/org.jetbrains.kotlin.android/d' "$APP_GRADLE"
+
+      - name: Build Nexora
+        run: |
+          PROJECT_DIR=$(find project -name settings.gradle.kts -printf '%h\n' | head -n 1)
+          cd "$PROJECT_DIR"
+          gradle assembleDebug
+
 name: Nexora Android Build
 
 on:
