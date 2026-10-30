@@ -1,4 +1,11 @@
-
+      - name: Fix Kotlin plugin conflict
+        run: |
+          APP_GRADLE=$(find project -path "*/app/build.gradle.kts" | head -n 1)
+          if [ -z "$APP_GRADLE" ]; then
+            echo "App Gradle file not found"
+            exit 1
+          fi
+          sed -i '/org.jetbrains.kotlin.android/d' "$APP_GRADLE"
 name: Nexora Android Build
 
 on:
