@@ -11,20 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract Nexora project
+      - name: Extract project ZIP
         run: |
-          ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" -print -quit)
-          if [ -z "$ZIP_FILE" ]; then
-            echo "Nexora ZIP not found"
-            exit 1
-          fi
-          mkdir extracted
-          unzip -q "$ZIP_FILE" -d extracted
-          PROJECT_DIR=$(find extracted -mindepth 1 -maxdepth 1 -type d | head -n 1)
-          cp -R "$PROJECT_DIR"/. .
+          mkdir project
+          unzip -q ./*.zip -d project
+          find project -name build.gradle.kts -print
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -32,17 +26,15 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.6.0'
-
-      - name: Build APK
-        run: gradle assembleDebug
+      - name: Build Nexora
+        run: |
+          PROJECT_DIR=$(find project -name settings.gradle.kts -printf '%h\n' | head -n 1)
+          cd "$PROJECT_DIR"
+          gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Nexora-Client-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: project/**/app/build/outputs/apk/debug/app-debug.apk
           
